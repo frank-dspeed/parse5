@@ -9,7 +9,7 @@ const DEFAULT_BUFFER_WATERLINE = 1 << 16;
 //(see: http://www.whatwg.org/specs/web-apps/current-work/multipage/parsing.html#preprocessing-the-input-stream)
 class Preprocessor {
     constructor() {
-        this.html = null;
+        this.html = '';
 
         this.pos = -1;
         this.lastGapPos = -1;
@@ -72,12 +72,7 @@ class Preprocessor {
     }
 
     write(chunk, isLastChunk) {
-        if (this.html) {
-            this.html += chunk;
-        } else {
-            this.html = chunk;
-        }
-
+        this.html += chunk;
         this.lastCharPos = this.html.length - 1;
         this.endOfChunkHit = false;
         this.lastChunkWritten = isLastChunk;
