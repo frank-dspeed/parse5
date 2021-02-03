@@ -4,7 +4,7 @@ const { Transform } = require('stream');
 const Tokenizer = require('parse5/lib/tokenizer');
 const LocationInfoTokenizerMixin = require('parse5/lib/extensions/location-info/tokenizer-mixin');
 const Mixin = require('parse5/lib/utils/mixin');
-const mergeOptions = require('parse5/lib/utils/merge-options');
+const mergeOptions = (defaults,options) => Object.assign(defaults,options || {})
 const DevNullStream = require('./dev-null-stream');
 const ParserFeedbackSimulator = require('./parser-feedback-simulator');
 
