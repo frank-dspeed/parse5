@@ -94,7 +94,7 @@ const XML_ATTRS_ADJUSTMENT_MAP = {
 };
 
 //SVG tag names adjustment map
-const SVG_TAG_NAMES_ADJUSTMENT_MAP = (exports.SVG_TAG_NAMES_ADJUSTMENT_MAP = {
+const SVG_TAG_NAMES_ADJUSTMENT_MAP = {
     altglyph: 'altGlyph',
     altglyphdef: 'altGlyphDef',
     altglyphitem: 'altGlyphItem',
@@ -131,7 +131,7 @@ const SVG_TAG_NAMES_ADJUSTMENT_MAP = (exports.SVG_TAG_NAMES_ADJUSTMENT_MAP = {
     lineargradient: 'linearGradient',
     radialgradient: 'radialGradient',
     textpath: 'textPath'
-});
+};
 
 //Tags that causes exit from foreign content
 const EXITS_FOREIGN_CONTENT = {
@@ -181,58 +181,6 @@ const EXITS_FOREIGN_CONTENT = {
     [$.VAR]: true
 };
 
-//Check exit from foreign content
-exports.causesExit = function(startTagToken) {
-    const tn = startTagToken.tagName;
-    const isFontWithAttrs =
-        tn === $.FONT &&
-        (Tokenizer.getTokenAttr(startTagToken, ATTRS.COLOR) !== null ||
-            Tokenizer.getTokenAttr(startTagToken, ATTRS.SIZE) !== null ||
-            Tokenizer.getTokenAttr(startTagToken, ATTRS.FACE) !== null);
-
-    return isFontWithAttrs ? true : EXITS_FOREIGN_CONTENT[tn];
-};
-
-//Token adjustments
-exports.adjustTokenMathMLAttrs = function(token) {
-    for (let i = 0; i < token.attrs.length; i++) {
-        if (token.attrs[i].name === DEFINITION_URL_ATTR) {
-            token.attrs[i].name = ADJUSTED_DEFINITION_URL_ATTR;
-            break;
-        }
-    }
-};
-
-exports.adjustTokenSVGAttrs = function(token) {
-    for (let i = 0; i < token.attrs.length; i++) {
-        const adjustedAttrName = SVG_ATTRS_ADJUSTMENT_MAP[token.attrs[i].name];
-
-        if (adjustedAttrName) {
-            token.attrs[i].name = adjustedAttrName;
-        }
-    }
-};
-
-exports.adjustTokenXMLAttrs = function(token) {
-    for (let i = 0; i < token.attrs.length; i++) {
-        const adjustedAttrEntry = XML_ATTRS_ADJUSTMENT_MAP[token.attrs[i].name];
-
-        if (adjustedAttrEntry) {
-            token.attrs[i].prefix = adjustedAttrEntry.prefix;
-            token.attrs[i].name = adjustedAttrEntry.name;
-            token.attrs[i].namespace = adjustedAttrEntry.namespace;
-        }
-    }
-};
-
-exports.adjustTokenSVGTagName = function(token) {
-    const adjustedTagName = SVG_TAG_NAMES_ADJUSTMENT_MAP[token.tagName];
-
-    if (adjustedTagName) {
-        token.tagName = adjustedTagName;
-    }
-};
-
 //Integration points
 function isMathMLTextIntegrationPoint(tn, ns) {
     return ns === NS.MATHML && (tn === $.MI || tn === $.MO || tn === $.MN || tn === $.MS || tn === $.MTEXT);
@@ -252,14 +200,67 @@ function isHtmlIntegrationPoint(tn, ns, attrs) {
     return ns === NS.SVG && (tn === $.FOREIGN_OBJECT || tn === $.DESC || tn === $.TITLE);
 }
 
-exports.isIntegrationPoint = function(tn, ns, attrs, foreignNS) {
-    if ((!foreignNS || foreignNS === NS.HTML) && isHtmlIntegrationPoint(tn, ns, attrs)) {
-        return true;
-    }
+const ForeignContent = {
+    SVG_TAG_NAMES_ADJUSTMENT_MAP,
+    //Check exit from foreign content
+    causesExit(startTagToken) {
+        const tn = startTagToken.tagName;
+        const isFontWithAttrs =
+            tn === $.FONT &&
+            (Tokenizer.getTokenAttr(startTagToken, ATTRS.COLOR) !== null ||
+                Tokenizer.getTokenAttr(startTagToken, ATTRS.SIZE) !== null ||
+                Tokenizer.getTokenAttr(startTagToken, ATTRS.FACE) !== null);
 
-    if ((!foreignNS || foreignNS === NS.MATHML) && isMathMLTextIntegrationPoint(tn, ns)) {
-        return true;
-    }
+        return isFontWithAttrs ? true : EXITS_FOREIGN_CONTENT[tn];
+    },
 
-    return false;
-};
+    //Token adjustments
+    adjustTokenMathMLAttrs(token) {
+        for (let i = 0; i < token.attrs.length; i++) {
+            if (token.attrs[i].name === DEFINITION_URL_ATTR) {
+                token.attrs[i].name = ADJUSTED_DEFINITION_URL_ATTR;
+                break;
+            }
+        }
+    },
+    adjustTokenSVGAttrs(token) {
+        for (let i = 0; i < token.attrs.length; i++) {
+            const adjustedAttrName = SVG_ATTRS_ADJUSTMENT_MAP[token.attrs[i].name];
+
+            if (adjustedAttrName) {
+                token.attrs[i].name = adjustedAttrName;
+            }
+        }
+    },
+    adjustTokenXMLAttrs(token) {
+        for (let i = 0; i < token.attrs.length; i++) {
+            const adjustedAttrEntry = XML_ATTRS_ADJUSTMENT_MAP[token.attrs[i].name];
+
+            if (adjustedAttrEntry) {
+                token.attrs[i].prefix = adjustedAttrEntry.prefix;
+                token.attrs[i].name = adjustedAttrEntry.name;
+                token.attrs[i].namespace = adjustedAttrEntry.namespace;
+            }
+        }
+    },
+    adjustTokenSVGTagName(token) {
+        const adjustedTagName = SVG_TAG_NAMES_ADJUSTMENT_MAP[token.tagName];
+
+        if (adjustedTagName) {
+            token.tagName = adjustedTagName;
+        }
+    },
+    isIntegrationPoint(tn, ns, attrs, foreignNS) {
+        if ((!foreignNS || foreignNS === NS.HTML) && isHtmlIntegrationPoint(tn, ns, attrs)) {
+            return true;
+        }
+
+        if ((!foreignNS || foreignNS === NS.MATHML) && isMathMLTextIntegrationPoint(tn, ns)) {
+            return true;
+        }
+
+        return false;
+    }
+}
+
+module.exports = ForeignContent;

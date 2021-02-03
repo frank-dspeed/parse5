@@ -2,11 +2,6 @@
 
 const unicode = require('../common/unicode');
 const ERR = require('../common/error-codes');
-
-//Aliases
-const $ = unicode.CODE_POINTS;
-
-//Const
 const DEFAULT_BUFFER_WATERLINE = 1 << 16;
 
 //Preprocessor
@@ -57,7 +52,7 @@ class Preprocessor {
         //NOTE: we are at the end of a chunk, therefore we can't infer surrogate pair yet.
         else if (!this.lastChunkWritten) {
             this.endOfChunkHit = true;
-            return $.EOF;
+            return unicode.CODE_POINTS.EOF;
         }
 
         //NOTE: isolated surrogate
@@ -100,23 +95,23 @@ class Preprocessor {
 
         if (this.pos > this.lastCharPos) {
             this.endOfChunkHit = !this.lastChunkWritten;
-            return $.EOF;
+            return unicode.CODE_POINTS.EOF;
         }
 
         let cp = this.html.charCodeAt(this.pos);
 
         //NOTE: any U+000A LINE FEED (LF) characters that immediately follow a U+000D CARRIAGE RETURN (CR) character
         //must be ignored.
-        if (this.skipNextNewLine && cp === $.LINE_FEED) {
+        if (this.skipNextNewLine && cp === unicode.CODE_POINTS.LINE_FEED) {
             this.skipNextNewLine = false;
             this._addGap();
             return this.advance();
         }
 
         //NOTE: all U+000D CARRIAGE RETURN (CR) characters must be converted to U+000A LINE FEED (LF) characters
-        if (cp === $.CARRIAGE_RETURN) {
+        if (cp === unicode.CODE_POINTS.CARRIAGE_RETURN) {
             this.skipNextNewLine = true;
-            return $.LINE_FEED;
+            return unicode.CODE_POINTS.LINE_FEED;
         }
 
         this.skipNextNewLine = false;
@@ -129,7 +124,7 @@ class Preprocessor {
         //range (ASCII alphanumeric, whitespaces, big chunk of BMP)
         //before going into detailed performance cost validation.
         const isCommonValidRange =
-            (cp > 0x1f && cp < 0x7f) || cp === $.LINE_FEED || cp === $.CARRIAGE_RETURN || (cp > 0x9f && cp < 0xfdd0);
+            (cp > 0x1f && cp < 0x7f) || cp === unicode.CODE_POINTS.LINE_FEED || cp === unicode.CODE_POINTS.CARRIAGE_RETURN || (cp > 0x9f && cp < 0xfdd0);
 
         if (!isCommonValidRange) {
             this._checkForProblematicCharacters(cp);

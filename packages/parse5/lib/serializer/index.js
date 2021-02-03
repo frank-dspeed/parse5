@@ -1,7 +1,7 @@
 'use strict';
 
 const defaultTreeAdapter = require('../tree-adapters/default');
-const mergeOptions = require('../utils/merge-options');
+
 const doctype = require('../common/doctype');
 const HTML = require('../common/html');
 
@@ -23,8 +23,8 @@ const GT_REGEX = />/g;
 
 //Serializer
 class Serializer {
-    constructor(node, options) {
-        this.options = mergeOptions(DEFAULT_OPTIONS, options);
+    constructor(node, options={}) {
+        this.options = Object.assign(DEFAULT_OPTIONS, options);
         this.treeAdapter = this.options.treeAdapter;
 
         this.html = '';

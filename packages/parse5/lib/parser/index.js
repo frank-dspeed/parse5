@@ -7,7 +7,6 @@ const LocationInfoParserMixin = require('../extensions/location-info/parser-mixi
 const ErrorReportingParserMixin = require('../extensions/error-reporting/parser-mixin');
 const Mixin = require('../utils/mixin');
 const defaultTreeAdapter = require('../tree-adapters/default');
-const mergeOptions = require('../utils/merge-options');
 const doctype = require('../common/doctype');
 const foreignContent = require('../common/foreign-content');
 const ERR = require('../common/error-codes');
@@ -320,9 +319,9 @@ const TOKEN_HANDLERS = {
 
 //Parser
 class Parser {
-    constructor(options) {
-        this.options = mergeOptions(DEFAULT_OPTIONS, options);
-
+    constructor(options={}) {
+        this.options = Object.assign(DEFAULT_OPTIONS, options);
+        const onParseError = this.options.onParseError
         this.treeAdapter = this.options.treeAdapter;
         this.pendingScript = null;
 
@@ -330,8 +329,8 @@ class Parser {
             Mixin.install(this, LocationInfoParserMixin);
         }
 
-        if (this.options.onParseError) {
-            Mixin.install(this, ErrorReportingParserMixin, { onParseError: this.options.onParseError });
+        if (onParseError) {
+            Mixin.install(this, ErrorReportingParserMixin, { onParseError });
         }
     }
 
@@ -381,7 +380,7 @@ class Parser {
 
     //Bootstrap parser
     _bootstrap(document, fragmentContext) {
-        this.tokenizer = new Tokenizer(this.options);
+        this.tokenizer = new Tokenizer();
 
         this.stopped = false;
 

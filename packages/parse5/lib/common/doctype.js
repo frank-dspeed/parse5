@@ -95,68 +95,70 @@ function hasPrefix(publicId, prefixes) {
     return false;
 }
 
-//API
-exports.isConforming = function(token) {
-    return (
-        token.name === VALID_DOCTYPE_NAME &&
-        token.publicId === null &&
-        (token.systemId === null || token.systemId === VALID_SYSTEM_ID)
-    );
-};
+const API = {
+    isConforming(token) {
+        return (
+            token.name === VALID_DOCTYPE_NAME &&
+            token.publicId === null &&
+            (token.systemId === null || token.systemId === VALID_SYSTEM_ID)
+        );
+    },
 
-exports.getDocumentMode = function(token) {
-    if (token.name !== VALID_DOCTYPE_NAME) {
-        return DOCUMENT_MODE.QUIRKS;
-    }
-
-    const systemId = token.systemId;
-
-    if (systemId && systemId.toLowerCase() === QUIRKS_MODE_SYSTEM_ID) {
-        return DOCUMENT_MODE.QUIRKS;
-    }
-
-    let publicId = token.publicId;
-
-    if (publicId !== null) {
-        publicId = publicId.toLowerCase();
-
-        if (QUIRKS_MODE_PUBLIC_IDS.indexOf(publicId) > -1) {
+    getDocumentMode(token) {
+        if (token.name !== VALID_DOCTYPE_NAME) {
             return DOCUMENT_MODE.QUIRKS;
         }
 
-        let prefixes = systemId === null ? QUIRKS_MODE_NO_SYSTEM_ID_PUBLIC_ID_PREFIXES : QUIRKS_MODE_PUBLIC_ID_PREFIXES;
+        const systemId = token.systemId;
 
-        if (hasPrefix(publicId, prefixes)) {
+        if (systemId && systemId.toLowerCase() === QUIRKS_MODE_SYSTEM_ID) {
             return DOCUMENT_MODE.QUIRKS;
         }
 
-        prefixes =
-            systemId === null ? LIMITED_QUIRKS_PUBLIC_ID_PREFIXES : LIMITED_QUIRKS_WITH_SYSTEM_ID_PUBLIC_ID_PREFIXES;
+        let publicId = token.publicId;
 
-        if (hasPrefix(publicId, prefixes)) {
-            return DOCUMENT_MODE.LIMITED_QUIRKS;
+        if (publicId !== null) {
+            publicId = publicId.toLowerCase();
+
+            if (QUIRKS_MODE_PUBLIC_IDS.indexOf(publicId) > -1) {
+                return DOCUMENT_MODE.QUIRKS;
+            }
+
+            let prefixes = systemId === null ? QUIRKS_MODE_NO_SYSTEM_ID_PUBLIC_ID_PREFIXES : QUIRKS_MODE_PUBLIC_ID_PREFIXES;
+
+            if (hasPrefix(publicId, prefixes)) {
+                return DOCUMENT_MODE.QUIRKS;
+            }
+
+            prefixes =
+                systemId === null ? LIMITED_QUIRKS_PUBLIC_ID_PREFIXES : LIMITED_QUIRKS_WITH_SYSTEM_ID_PUBLIC_ID_PREFIXES;
+
+            if (hasPrefix(publicId, prefixes)) {
+                return DOCUMENT_MODE.LIMITED_QUIRKS;
+            }
         }
+
+        return DOCUMENT_MODE.NO_QUIRKS;
+    },
+
+    serializeContent(name, publicId, systemId) {
+        let str = '!DOCTYPE ';
+
+        if (name) {
+            str += name;
+        }
+
+        if (publicId) {
+            str += ' PUBLIC ' + enquoteDoctypeId(publicId);
+        } else if (systemId) {
+            str += ' SYSTEM';
+        }
+
+        if (systemId !== null) {
+            str += ' ' + enquoteDoctypeId(systemId);
+        }
+
+        return str;
     }
-
-    return DOCUMENT_MODE.NO_QUIRKS;
-};
-
-exports.serializeContent = function(name, publicId, systemId) {
-    let str = '!DOCTYPE ';
-
-    if (name) {
-        str += name;
-    }
-
-    if (publicId) {
-        str += ' PUBLIC ' + enquoteDoctypeId(publicId);
-    } else if (systemId) {
-        str += ' SYSTEM';
-    }
-
-    if (systemId !== null) {
-        str += ' ' + enquoteDoctypeId(systemId);
-    }
-
-    return str;
-};
+}
+module.exports = API;
