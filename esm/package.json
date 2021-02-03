@@ -1,0 +1,21 @@
+{
+    "name": "esm-parse5",
+    "license": "(MIT OR Apache-2.0)",
+    "type": "module",
+    "exports": {
+        "./features/*": "./src/features/*.js",
+        "import": "./main-module.js",
+        "require": "./main-require.cjs"
+    },
+    "imports": {
+        "#internal/*": "./src/internal/*.js"
+    },
+    "devDependencies": {
+        "rollup":"2.38.4",
+        "@rollup/plugin-commonjs": "17.1.0",
+        "@rollup/plugin-alias": "3.1.2"
+    },
+    "files": [
+        "lib"
+    ]
+}
