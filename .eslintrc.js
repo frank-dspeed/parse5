@@ -1,9 +1,9 @@
 module.exports = {
     env: {
         es6: true,
-        node: true
+        node: true,
     },
-    extends: ['eslint:recommended', 'prettier'],
+    extends: ['eslint:recommended', 'plugin:prettier/recommended'],
     plugins: ['prettier'],
     rules: {
         'prettier/prettier': 'error',
@@ -12,9 +12,9 @@ module.exports = {
         'prefer-arrow-callback': 'error',
         'one-var': ['error', 'never'],
         'no-var': 'error',
-        'prefer-const': 'error'
+        'prefer-const': 'error',
     },
     parserOptions: {
-        ecmaVersion: 6
-    }
+        ecmaVersion: 2020,
+    },
 };
